@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#132a13">
+    <title>Workout Tracker</title>
+    <link rel="manifest" href="manifest.webmanifest">
+    <link rel="icon" href="icon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">Intermediate Template B</p>
+          <h1>Workout Tracker</h1>
+        </div>
+        <button id="installButton" class="ghost hidden" type="button">Install</button>
+      </header>
+
+      <main id="app" class="view-stack">
+        <section id="homeView" class="view active"></section>
+        <section id="workoutView" class="view hidden"></section>
+        <section id="historyView" class="view hidden"></section>
+        <section id="exportView" class="view hidden"></section>
+        <section id="settingsView" class="view hidden"></section>
+      </main>
+
+      <nav class="bottom-nav" aria-label="Primary">
+        <button data-view="home" class="nav-button active" type="button">Home</button>
+        <button data-view="workout" class="nav-button" type="button">Workout</button>
+        <button data-view="history" class="nav-button" type="button">History</button>
+        <button data-view="export" class="nav-button" type="button">Export</button>
+        <button data-view="settings" class="nav-button" type="button">Settings</button>
+      </nav>
+    </div>
+
+    <dialog id="onboardingDialog" class="modal"></dialog>
+    <dialog id="baselineDialog" class="modal"></dialog>
+
+    <script type="module" src="app.js"></script>
+  </body>
+</html>

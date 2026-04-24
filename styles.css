@@ -1,0 +1,331 @@
+:root {
+  --bg: #f7f3e9;
+  --surface: rgba(255, 252, 245, 0.92);
+  --surface-strong: #fffaf0;
+  --ink: #142013;
+  --muted: #53624f;
+  --accent: #31572c;
+  --accent-soft: #90a955;
+  --accent-warm: #ecf39e;
+  --border: rgba(49, 87, 44, 0.18);
+  --shadow: 0 18px 40px rgba(20, 32, 19, 0.12);
+  --radius: 24px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  min-height: 100%;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  background:
+    radial-gradient(circle at top left, rgba(236, 243, 158, 0.9), transparent 35%),
+    radial-gradient(circle at bottom right, rgba(144, 169, 85, 0.4), transparent 30%),
+    linear-gradient(180deg, #fefcf7 0%, var(--bg) 100%);
+  color: var(--ink);
+}
+
+body {
+  padding: 20px 16px 88px;
+}
+
+button, input, select, textarea {
+  font: inherit;
+}
+
+button {
+  border: none;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.app-shell {
+  max-width: 860px;
+  margin: 0 auto;
+}
+
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.eyebrow {
+  margin: 0 0 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+
+h1, h2, h3, p {
+  margin-top: 0;
+}
+
+h1, h2, h3 {
+  font-family: Georgia, "Times New Roman", serif;
+}
+
+.view-stack {
+  display: grid;
+}
+
+.hidden {
+  display: none !important;
+}
+
+.hero-card,
+.panel,
+.set-card,
+.empty-state {
+  background: var(--surface);
+  backdrop-filter: blur(18px);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+.hero-card,
+.panel,
+.empty-state {
+  padding: 20px;
+}
+
+.hero-card {
+  background:
+    linear-gradient(135deg, rgba(49, 87, 44, 0.92), rgba(19, 42, 19, 0.95)),
+    var(--surface);
+  color: white;
+  margin-bottom: 20px;
+}
+
+.hero-card .eyebrow,
+.hero-card .muted,
+.hero-card .statline {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.compact {
+  margin-bottom: 16px;
+}
+
+.main-lift {
+  font-size: clamp(1.8rem, 5vw, 3rem);
+  margin-bottom: 10px;
+}
+
+.progress-row,
+.hero-actions,
+.option-row,
+.workout-actions,
+.set-actions,
+.weight-editor,
+.panel-grid,
+.bottom-nav {
+  display: flex;
+  gap: 12px;
+}
+
+.progress-row,
+.workout-actions {
+  justify-content: space-between;
+  align-items: center;
+}
+
+.hero-actions,
+.option-row,
+.set-actions,
+.weight-editor {
+  flex-wrap: wrap;
+  margin-top: 16px;
+}
+
+.weight-editor input {
+  flex: 1 1 180px;
+}
+
+.panel-grid {
+  flex-wrap: wrap;
+}
+
+.panel-grid > * {
+  flex: 1 1 220px;
+}
+
+.panel + .panel,
+.panel + .stack,
+.stack > * + * {
+  margin-top: 16px;
+}
+
+.stack {
+  display: grid;
+  gap: 16px;
+}
+
+.primary,
+.ghost,
+.chip,
+.nav-button {
+  padding: 14px 18px;
+  transition: transform 160ms ease, background-color 160ms ease, color 160ms ease;
+}
+
+.primary {
+  background: var(--accent-warm);
+  color: var(--ink);
+}
+
+.ghost {
+  background: rgba(255, 255, 255, 0.75);
+  color: var(--ink);
+  border: 1px solid var(--border);
+}
+
+.chip {
+  background: rgba(236, 243, 158, 0.18);
+  color: var(--ink);
+  border: 1px solid rgba(236, 243, 158, 0.5);
+}
+
+.chip.selected,
+.nav-button.active {
+  background: var(--accent);
+  color: white;
+}
+
+.wide {
+  width: 100%;
+}
+
+.small {
+  padding: 10px 12px;
+  font-size: 0.95rem;
+}
+
+.muted,
+.statline {
+  color: var(--muted);
+}
+
+.set-list {
+  display: grid;
+  gap: 12px;
+}
+
+.set-card {
+  padding: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.set-card.done {
+  border-color: rgba(49, 87, 44, 0.5);
+  background: rgba(236, 243, 158, 0.45);
+}
+
+.set-card.skipped {
+  opacity: 0.72;
+}
+
+.set-label {
+  font-size: 1.2rem;
+  margin-bottom: 6px;
+}
+
+.bottom-nav {
+  position: fixed;
+  left: 12px;
+  right: 12px;
+  bottom: 12px;
+  padding: 10px;
+  justify-content: space-between;
+  background: rgba(255, 250, 240, 0.92);
+  backdrop-filter: blur(18px);
+  border-radius: 28px;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+}
+
+.nav-button {
+  flex: 1 1 0;
+  background: transparent;
+  color: var(--muted);
+}
+
+label {
+  display: grid;
+  gap: 8px;
+}
+
+input,
+select,
+textarea {
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  padding: 14px 16px;
+  background: var(--surface-strong);
+  color: var(--ink);
+}
+
+.csv-output {
+  min-height: 320px;
+  width: 100%;
+  resize: vertical;
+}
+
+.modal {
+  width: min(560px, calc(100vw - 32px));
+  border: none;
+  border-radius: 24px;
+  padding: 0;
+  background: var(--surface-strong);
+  color: var(--ink);
+  box-shadow: var(--shadow);
+}
+
+.modal::backdrop {
+  background: rgba(20, 32, 19, 0.45);
+}
+
+.modal form {
+  padding: 24px;
+}
+
+menu {
+  padding: 0;
+  margin: 0;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+@media (max-width: 640px) {
+  body {
+    padding: 14px 12px 94px;
+  }
+
+  .topbar,
+  .set-card,
+  .workout-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .bottom-nav {
+    gap: 6px;
+  }
+
+  .nav-button {
+    padding: 12px 8px;
+    font-size: 0.9rem;
+  }
+}

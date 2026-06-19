@@ -484,9 +484,10 @@ function setupInstallPrompt() {
   });
 }
 
-function setupPwa() {
+async function setupPwa() {
   if ("serviceWorker" in navigator) {
-    navigator.serviceWorker.register("./sw.js");
+    const registration = await navigator.serviceWorker.register("./sw.js");
+    registration.update();
   }
 }
 

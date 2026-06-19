@@ -454,13 +454,14 @@ function buildBlockSession(state, block) {
     : null;
   const selectedTopSet = block.type === "light" ? base.derivedTopSet : null;
   const topSetOptions = block.type === "main" ? base.recommendations : [];
+  const plannedNextTopSet = block.type === "main" ? base.lastTopSet : null;
   const sets = block.sets.map((setDef, index) => ({
     id: `${block.name}-${index}`,
     completed: false,
     skipped: Boolean(setDef.optional),
     ...(block.type === "accessory"
       ? buildAccessorySet(setDef, accessoryWeight, state.settings)
-      : buildSet(setDef, selectedTopSet, state.settings))
+      : buildSet(setDef, block.type === "main" ? base.lastTopSet : selectedTopSet, state.settings))
   }));
 
   return {
@@ -470,7 +471,8 @@ function buildBlockSession(state, block) {
     trackWeight: block.type === "accessory",
     accessoryWeight,
     topSetOptions,
-    selectedTopSet,
+    selectedTopSet: block.type === "main" ? base.lastTopSet : selectedTopSet,
+    plannedNextTopSet,
     sets
   };
 }
@@ -491,13 +493,14 @@ export function createSession(state, workoutId) {
   };
 }
 
-export function selectTopSet(state, session, blockIndex, weight) {
+export function selectNextTopSet(state, session, blockIndex, weight) {
   const nextSession = clone(session);
   const block = nextSession.blocks[blockIndex];
-  block.selectedTopSet = weight;
-  block.sets = block.sets.map((set) => buildSelectedSet(set, weight, state.settings));
+  block.plannedNextTopSet = weight;
   return nextSession;
 }
+
+export const selectTopSet = selectNextTopSet;
 
 export function updateAccessoryWeight(state, session, blockIndex, weight) {
   const nextSession = clone(session);
@@ -505,19 +508,6 @@ export function updateAccessoryWeight(state, session, blockIndex, weight) {
   block.accessoryWeight = weight;
   block.sets = block.sets.map((set) => buildAccessorySet(set, weight, state.settings));
   return nextSession;
-}
-
-function buildSelectedSet(set, topSetWeight, settings) {
-  if (set.kind !== "percent") {
-    return set;
-  }
-
-  const weight = roundToIncrement((topSetWeight * set.percent) / 100, settings.roundingIncrement);
-  return {
-    ...set,
-    label: `${formatWeight(weight)} lb`,
-    weight
-  };
 }
 
 export function toggleSet(session, blockIndex, setIndex, mode = "completed") {
@@ -562,7 +552,7 @@ export function completeWorkout(state, session, note = "") {
   for (const block of finalized.blocks) {
     if (block.type === "main" && block.selectedTopSet != null) {
       nextState.liftHistory[block.liftKey].push({
-        weight: block.selectedTopSet,
+        weight: block.plannedNextTopSet ?? block.selectedTopSet,
         date: finalized.completedAt,
         workoutId: finalized.workoutId
       });
@@ -608,6 +598,39 @@ export function seedBaselines(state, baselines) {
       }
     ];
   }
+  return nextState;
+}
+
+export function updateMainLiftMaxes(state, maxes) {
+  const nextState = clone(state);
+  const now = new Date().toISOString();
+
+  for (const [liftKey, weight] of Object.entries(maxes)) {
+    if (!LIFTS.includes(liftKey)) {
+      continue;
+    }
+
+    const nextWeight = Number(weight);
+    if (!Number.isFinite(nextWeight) || nextWeight <= 0) {
+      continue;
+    }
+
+    const current = getLastMainTopSet(nextState, liftKey)?.weight;
+    if (current === nextWeight) {
+      continue;
+    }
+
+    if (!nextState.liftHistory[liftKey]) {
+      nextState.liftHistory[liftKey] = [];
+    }
+
+    nextState.liftHistory[liftKey].push({
+      weight: nextWeight,
+      date: now,
+      workoutId: "Settings"
+    });
+  }
+
   return nextState;
 }
 

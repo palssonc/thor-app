@@ -16,9 +16,10 @@ import {
   rowsToCsv,
   saveState,
   seedBaselines,
-  selectTopSet,
+  selectNextTopSet,
   toggleSet,
   updateAccessoryWeight,
+  updateMainLiftMaxes,
   updateSettings
 } from "./logic.js";
 
@@ -122,14 +123,14 @@ function renderWorkout() {
   }
 
   const block = session.blocks[session.blockIndex];
-  const topSetPicker = block.type === "main"
+  const nextTopSetPicker = block.type === "main"
     ? `
       <section class="panel">
-        <h3>Top Set</h3>
-        <p class="muted">Pick today’s top set before the percentage work fills in.</p>
+        <h3>Next Time</h3>
+        <p class="muted">Today is based on ${formatWeight(block.selectedTopSet)} lb. Choose the max to use for this lift next time.</p>
         <div class="option-row">
           ${block.topSetOptions.map((option) => `
-            <button class="chip ${block.selectedTopSet === option ? "selected" : ""}" data-top-set="${option}" type="button">
+            <button class="chip ${block.plannedNextTopSet === option ? "selected" : ""}" data-next-top-set="${option}" type="button">
               ${formatWeight(option)} lb
             </button>
           `).join("")}
@@ -160,7 +161,6 @@ function renderWorkout() {
       <p class="muted">${block.type === "main" ? "Main lift" : block.type === "light" ? "Light lift" : "Accessory"}</p>
     </section>
 
-    ${topSetPicker}
     ${accessoryWeightEditor}
 
     <section class="panel">
@@ -179,6 +179,8 @@ function renderWorkout() {
         `).join("")}
       </div>
     </section>
+
+    ${nextTopSetPicker}
 
     <section class="workout-actions">
       <button id="previousBlock" class="ghost" type="button" ${session.blockIndex === 0 ? "disabled" : ""}>Previous</button>
@@ -202,9 +204,9 @@ function renderWorkout() {
     });
   }
 
-  for (const button of elements.workout.querySelectorAll("[data-top-set]")) {
+  for (const button of elements.workout.querySelectorAll("[data-next-top-set]")) {
     button.addEventListener("click", () => {
-      state.programState.inProgressSession = selectTopSet(state, session, session.blockIndex, Number(button.dataset.topSet));
+      state.programState.inProgressSession = selectNextTopSet(state, session, session.blockIndex, Number(button.dataset.nextTopSet));
       persist();
       renderWorkout();
     });
@@ -315,7 +317,16 @@ function renderExport() {
 }
 
 function renderSettings() {
-  const lastBench = getLastMainTopSet(state, "Bench Press");
+  const liftInputs = LIFTS.map((lift) => {
+    const current = getLastMainTopSet(state, lift);
+    return `
+      <label>
+        <span>${lift} current max</span>
+        <input name="${lift}" type="number" min="0" step="2.5" value="${current ? current.weight : ""}" required>
+      </label>
+    `;
+  }).join("");
+
   elements.settings.innerHTML = `
     <form id="settingsForm" class="panel stack">
       <h2>Settings</h2>
@@ -334,8 +345,11 @@ function renderSettings() {
           <option value="Lat Pulldowns" ${state.settings.workoutBAccessory === "Lat Pulldowns" ? "selected" : ""}>Lat Pulldowns</option>
         </select>
       </label>
+      <div class="stack">
+        <p class="eyebrow">Main lift maxes</p>
+        ${liftInputs}
+      </div>
       <button class="primary" type="submit">Save Settings</button>
-      <p class="muted">Bench baseline: ${lastBench ? `${formatWeight(lastBench.weight)} lb` : "not set yet"}</p>
     </form>
   `;
 
@@ -347,6 +361,7 @@ function renderSettings() {
       roundingIncrement: Number(form.get("roundingIncrement")),
       workoutBAccessory: form.get("workoutBAccessory")
     });
+    state = updateMainLiftMaxes(state, Object.fromEntries(LIFTS.map((lift) => [lift, Number(form.get(lift))])));
     persist();
     render();
   });

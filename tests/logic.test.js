@@ -11,9 +11,10 @@ import {
   missingBaselinesForWorkout,
   rowsToCsv,
   seedBaselines,
-  selectTopSet,
+  selectNextTopSet,
   toggleSet,
-  updateAccessoryWeight
+  updateAccessoryWeight,
+  updateMainLiftMaxes
 } from "../logic.js";
 
 test("first workout can be created after baselines are seeded", () => {
@@ -29,6 +30,8 @@ test("first workout can be created after baselines are seeded", () => {
 
   assert.equal(session.workoutId, "A");
   assert.deepEqual(session.blocks[0].topSetOptions, [200, 202.5, 205]);
+  assert.equal(session.blocks[0].selectedTopSet, 200);
+  assert.equal(session.blocks[0].sets[4].weight, 200);
   assert.equal(session.blocks[1].selectedTopSet, 115);
 });
 
@@ -43,7 +46,7 @@ test("missing baseline detection only returns lifts needed for a workout", () =>
   assert.deepEqual(missingBaselinesForWorkout(state, "B"), ["Deadlift"]);
 });
 
-test("top set selection fills percentage weights and workout completion advances cycle", () => {
+test("next top set selection advances the stored max after workout completion", () => {
   let state = createInitialState();
   state = seedBaselines(state, {
     "Bench Press": 200,
@@ -54,10 +57,11 @@ test("top set selection fills percentage weights and workout completion advances
 
   let session = createSession(state, "A");
   assert.equal(canCompleteWorkout(session), false);
-  session = selectTopSet(state, session, 0, 205);
+  session = selectNextTopSet(state, session, 0, 205);
   session = updateAccessoryWeight(state, session, 2, 30);
-  assert.equal(session.blocks[0].sets[4].weight, 205);
-  assert.equal(session.blocks[0].sets[5].weight, 175);
+  assert.equal(session.blocks[0].sets[4].weight, 200);
+  assert.equal(session.blocks[0].sets[5].weight, 170);
+  assert.equal(session.blocks[0].plannedNextTopSet, 205);
 
   session.blocks.forEach((block, blockIndex) => {
     block.sets.forEach((_, setIndex) => {
@@ -74,6 +78,27 @@ test("top set selection fills percentage weights and workout completion advances
   assert.equal(state.liftHistory["Bench Press"].at(-1).weight, 205);
 });
 
+test("main lift maxes can be updated from settings", () => {
+  let state = createInitialState();
+  state = seedBaselines(state, {
+    "Bench Press": 200,
+    Squat: 275,
+    Press: 135,
+    Deadlift: 315
+  });
+
+  state = updateMainLiftMaxes(state, {
+    "Bench Press": 210,
+    Squat: 275,
+    Press: 140,
+    Deadlift: 315
+  });
+
+  assert.equal(state.liftHistory["Bench Press"].at(-1).weight, 210);
+  assert.equal(state.liftHistory.Press.at(-1).weight, 140);
+  assert.equal(state.liftHistory.Squat.length, 1);
+});
+
 test("export creates spreadsheet-friendly csv", () => {
   let state = createInitialState();
   state = seedBaselines(state, {
@@ -84,7 +109,7 @@ test("export creates spreadsheet-friendly csv", () => {
   });
 
   let session = createSession(state, "A");
-  session = selectTopSet(state, session, 0, 202.5);
+  session = selectNextTopSet(state, session, 0, 202.5);
   session = updateAccessoryWeight(state, session, 2, 30);
   session.blocks.forEach((block, blockIndex) => {
     block.sets.forEach((_, setIndex) => {
@@ -111,7 +136,7 @@ test("accessory weights can be tracked, reused, and exported", () => {
   });
 
   let session = createSession(state, "A");
-  session = selectTopSet(state, session, 0, 202.5);
+  session = selectNextTopSet(state, session, 0, 202.5);
   session = updateAccessoryWeight(state, session, 2, 30);
 
   assert.equal(session.blocks[2].sets[0].weight, 30);
